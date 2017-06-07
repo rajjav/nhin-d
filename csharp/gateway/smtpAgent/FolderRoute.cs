@@ -39,11 +39,13 @@ namespace Health.Direct.SmtpAgent
     {
         Func<ISmtpMessage, string, bool> m_copyHandler;
         FolderBalancer<ISmtpMessage> m_loadBalancer;
+        ILogger m_logger;
                 
         public FolderRoute()
         {
             m_copyHandler = this.CopyToFolder;
             m_loadBalancer = new FolderBalancer<ISmtpMessage>(m_copyHandler);
+            m_logger = Log.For(this);
         }
 
         /// <summary>
@@ -137,8 +139,9 @@ namespace Health.Direct.SmtpAgent
                 message.SaveToFile(Path.Combine(folderPath, uniqueFileName));
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                m_logger.Error("Failed to save to file", ex);
             }
             
             return false;
